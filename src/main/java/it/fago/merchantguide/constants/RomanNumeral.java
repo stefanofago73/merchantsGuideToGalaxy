@@ -32,7 +32,7 @@ public enum RomanNumeral {
 	public static int toDecimal(List<RomanNumeral> numerals) {
 		int size;
 		if (numerals == null || (size = numerals.size()) == 0) {
-			return -1;
+			return 0;
 		}
 		RomanNumeral[] elements = numerals.toArray(new RomanNumeral[0]);
 
