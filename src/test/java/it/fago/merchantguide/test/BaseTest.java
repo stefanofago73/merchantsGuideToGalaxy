@@ -1,4 +1,4 @@
-package it.fago.merchantguide.second;
+package it.fago.merchantguide.test;
 
 import java.util.Arrays;
 import java.util.Collection;

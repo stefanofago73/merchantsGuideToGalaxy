@@ -1,4 +1,4 @@
-package it.fago.merchantguide.second;
+package it.fago.merchantguide.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

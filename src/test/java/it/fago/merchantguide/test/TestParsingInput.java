@@ -1,4 +1,4 @@
-package it.fago.merchantguide.second;
+package it.fago.merchantguide.test;
 
 import static it.fago.merchantguide.constants.RomanNumeral.C;
 import static it.fago.merchantguide.constants.RomanNumeral.D;
@@ -7,14 +7,14 @@ import static it.fago.merchantguide.constants.RomanNumeral.L;
 import static it.fago.merchantguide.constants.RomanNumeral.M;
 import static it.fago.merchantguide.constants.RomanNumeral.V;
 import static it.fago.merchantguide.constants.RomanNumeral.X;
-import static it.fago.merchantguide.second.SampleData.complete1;
-import static it.fago.merchantguide.second.SampleData.from;
-import static it.fago.merchantguide.second.SampleData.numeralEmpty;
-import static it.fago.merchantguide.second.SampleData.numeralSet1;
-import static it.fago.merchantguide.second.SampleData.numeralSet2;
-import static it.fago.merchantguide.second.SampleData.numeralSet3;
-import static it.fago.merchantguide.second.SampleData.numeralsCorruptedAtTheEnd;
-import static it.fago.merchantguide.second.SampleData.numeralsCorruptedAtTheStart;
+import static it.fago.merchantguide.test.SampleData.complete1;
+import static it.fago.merchantguide.test.SampleData.from;
+import static it.fago.merchantguide.test.SampleData.numeralEmpty;
+import static it.fago.merchantguide.test.SampleData.numeralSet1;
+import static it.fago.merchantguide.test.SampleData.numeralSet2;
+import static it.fago.merchantguide.test.SampleData.numeralSet3;
+import static it.fago.merchantguide.test.SampleData.numeralsCorruptedAtTheEnd;
+import static it.fago.merchantguide.test.SampleData.numeralsCorruptedAtTheStart;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

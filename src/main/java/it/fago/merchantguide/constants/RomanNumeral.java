@@ -1,6 +1,5 @@
 package it.fago.merchantguide.constants;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -36,7 +35,7 @@ public enum RomanNumeral {
 			return -1;
 		}
 		RomanNumeral[] elements = numerals.toArray(new RomanNumeral[0]);
-		
+
 		int num = 0;
 		int decimalNum = 0;
 		int previousnum = 0;
@@ -70,6 +69,8 @@ public enum RomanNumeral {
 				previousnum = num;
 				num = M.decimalValue();
 				break;
+			case Invalid:
+				continue;
 			default:
 				continue;
 			}

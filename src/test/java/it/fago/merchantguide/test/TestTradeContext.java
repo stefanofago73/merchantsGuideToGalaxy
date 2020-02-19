@@ -1,9 +1,9 @@
-package it.fago.merchantguide.second;
+package it.fago.merchantguide.test;
 
-import static it.fago.merchantguide.second.SampleData.complete1;
-import static it.fago.merchantguide.second.SampleData.completeCorrupted;
-import static it.fago.merchantguide.second.SampleData.completeEmpty;
-import static it.fago.merchantguide.second.SampleData.from;
+import static it.fago.merchantguide.test.SampleData.complete1;
+import static it.fago.merchantguide.test.SampleData.completeCorrupted;
+import static it.fago.merchantguide.test.SampleData.completeEmpty;
+import static it.fago.merchantguide.test.SampleData.from;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Optional;

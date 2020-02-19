@@ -1,4 +1,4 @@
-package it.fago.merchantguide.second;
+package it.fago.merchantguide.test;
 
 import static it.fago.merchantguide.constants.RomanNumeral.C;
 import static it.fago.merchantguide.constants.RomanNumeral.I;
