@@ -189,7 +189,8 @@ public class ParserImpl implements Parser {
 
 			List<RomanNumeral> numerals = 
 					Stream.of(elements)
-					  .map(symbol -> symbolsCache.getOrDefault(symbol, RomanNumeral.Invalid))
+					  .filter(symbol -> symbolsCache.get(symbol)!=null )
+					  .map(symbolsCache::get)
 					.collect(Collectors.toList());
 
 			Metal metal = 
