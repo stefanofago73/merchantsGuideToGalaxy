@@ -13,6 +13,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import it.fago.merchantguide.Parser;
 import it.fago.merchantguide.TradeContext;
 import it.fago.merchantguide.TradeQuery;
@@ -21,12 +24,16 @@ import it.fago.merchantguide.constants.RomanNumeral;
 
 public class ParserImpl implements Parser {
 
+	private static final Logger logger = LoggerFactory.getLogger(ParserImpl.class);
+	
 	private Pattern symbolPattern = Pattern.compile("([a-z]+) means ([I|V|X|L|C|D|M])");
 
 	private Pattern creditPattern = Pattern
 			.compile("([a-z\\s]+)units of (Silver|Iron|Gold) are worth (\\d+)\\sCredits");
 
 	private Pattern isQueryPattern = Pattern.compile("(how\\s)(much|many)\\s(Credits\\s?)?(is\\s?)?(.+)(\\s\\?)");
+	
+	private Pattern queryMetal = Pattern.compile("(.+)(Silver|Iron|Gold)(.*)");
 
 	private HashMap<String, RomanNumeral> symbolsCache = new HashMap<>();
 
@@ -40,7 +47,7 @@ public class ParserImpl implements Parser {
 	
 	private int parsed=0;
 	
-	private final Runnable DO_NOTHING = () -> failed++;
+	private final Runnable failedLineTask = () -> failed++;
 
 	
 	public Parser parse(InputStream inputStream) {
@@ -99,7 +106,7 @@ public class ParserImpl implements Parser {
 		if (isQuery(line)) {
 			return defineQuery(line);
 		}
-		return DO_NOTHING;
+		return failedLineTask;
 	}
 
 	// =======================================================
@@ -131,11 +138,11 @@ public class ParserImpl implements Parser {
 		if (matcher.matches()) {
 			int groupCount = matcher.groupCount();
 			if (groupCount < 2) {
-				return DO_NOTHING;
+				return failedLineTask;
 			}
 			return createSymbolTask(matcher.group(1), matcher.group(2));
 		}
-		return DO_NOTHING;
+		return failedLineTask;
 	}
 
 	protected Runnable defineRule(String line) {
@@ -143,11 +150,11 @@ public class ParserImpl implements Parser {
 		if (matcher.matches()) {
 			int groupCount = matcher.groupCount();
 			if (groupCount < 3) {
-				return DO_NOTHING;
+				return failedLineTask;
 			}
 			return createRuleTask(matcher.group(1), matcher.group(2), matcher.group(3));
 		}
-		return DO_NOTHING;
+		return failedLineTask;
 	}
 
 	protected Runnable defineQuery(String line) {
@@ -155,11 +162,11 @@ public class ParserImpl implements Parser {
 		if (matcher.matches()) {
 			int groupCount = matcher.groupCount();
 			if (groupCount < 6) {
-				return DO_NOTHING;
+				return failedLineTask;
 			}
 			return createQueryTask(matcher.group(5));
 		}
-		return DO_NOTHING;
+		return failedLineTask;
 	}
 
 	// =======================================================
@@ -167,6 +174,14 @@ public class ParserImpl implements Parser {
 	// Internals : Tasks
 	//
 	// =======================================================
+	
+	private String [] symbolsAndMetal(String input){
+		Matcher matcher = queryMetal.matcher(input);
+		if(!matcher.matches()){
+			return new String[]{input,""};
+		}
+		return new String[]{matcher.group(1),matcher.group(2)};
+	}
 	
 	protected Runnable createSymbolTask(String letteral, String value) {
 		return () -> symbolsCache.put(letteral, RomanNumeral.lookup(value));
@@ -185,25 +200,21 @@ public class ParserImpl implements Parser {
 
 	protected Runnable createQueryTask(final String data) {
 		return () -> {
-			String[] elements = data.split("\\s");
+						
+			String [] symbolsAndMetal = symbolsAndMetal(data);
+			StringBuilder sb = new StringBuilder();
+			String[] elements = symbolsAndMetal[0].split("\\s");
+			RomanNumeral value = null;
+			for (String element : elements) {
+				if( (value=symbolsCache.get(element))==null){
+					continue;
+				}
+				sb.append(value.name());
+			}
 
-			List<RomanNumeral> numerals = 
-					Stream.of(elements)
-					  .filter(symbol -> symbolsCache.get(symbol)!=null )
-					  .map(symbolsCache::get)
-					.collect(Collectors.toList());
-
-			Metal metal = 
-					Stream.of(elements)
-					 .filter(e -> Metal.lookup(e) != Metal.Invalid)
-					   .map(Metal::lookup)
-					 .findFirst()
-					.orElse(Metal.Invalid);
-			
-			int fromNumerals = numerals.isEmpty()?-1:RomanNumeral.toDecimal(numerals);
-			queriesCache.add(new TradeQuery(data, metal, fromNumerals));
+			int fromNumerals = RomanNumeral.toDecimal(sb.toString());
+			queriesCache.add(new TradeQuery(data, Metal.lookup(symbolsAndMetal[1]), fromNumerals));
 		};
 	}
-
 
 }// END

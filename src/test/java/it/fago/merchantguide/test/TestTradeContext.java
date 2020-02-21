@@ -56,7 +56,11 @@ public class TestTradeContext extends BaseTest {
 
 	protected void answering(TradeContext ctx) {
 
-		parser().queries().stream().map(ctx::answerFor).collect(Collectors.toList())
+		parser()
+		  .queries()
+		  .stream()
+		  .map(ctx::answerFor)
+		  .collect(Collectors.toList())
 				.forEach(a -> System.out.println(a.text()));
 
 		ctx.destroy();

@@ -17,7 +17,7 @@ public class TradeQuery {
   }
   
   public boolean isValid(){
-	  return numerals!=-1;
+	  return numerals>0;
   }
   
   public Metal metal(){

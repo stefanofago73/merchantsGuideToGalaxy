@@ -21,6 +21,7 @@ public class TradeContextImpl implements TradeContext {
 	}
 
 	public TradeAnswer answerFor(TradeQuery query) {
+				
 		if (query.isValid()) {
 			if (query.metal() == Metal.Invalid) {
 				return answerFor(query.sourceText(), query.numerals());
