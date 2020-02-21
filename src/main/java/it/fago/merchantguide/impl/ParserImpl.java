@@ -1,5 +1,8 @@
 package it.fago.merchantguide.impl;
 
+
+import static it.fago.merchantguide.constants.RomanNumeral.*;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
@@ -175,25 +178,18 @@ public class ParserImpl implements Parser {
 	//
 	// =======================================================
 	
-	private String [] symbolsAndMetal(String input){
-		Matcher matcher = queryMetal.matcher(input);
-		if(!matcher.matches()){
-			return new String[]{input,""};
-		}
-		return new String[]{matcher.group(1),matcher.group(2)};
-	}
 	
-	protected Runnable createSymbolTask(String letteral, String value) {
-		return () -> symbolsCache.put(letteral, RomanNumeral.lookup(value));
+	protected Runnable createSymbolTask(String word, String letteral) {
+		return () -> symbolsCache.put(word, lookup(letteral));
 	}
 
 	protected Runnable createRuleTask(String symbols, String metal, String credits) {
 		return () -> {
 			List<RomanNumeral> items = 
 					Stream.of(symbols.split("\\s"))
-					.map(symbol -> symbolsCache.getOrDefault(symbol, RomanNumeral.Invalid))
+					.map(symbol -> retrieveRoman(symbols,symbol))
 					  .collect(Collectors.toList());
-			ConversionRule rule = new ConversionRule(RomanNumeral.toDecimal(items), Metal.lookup(metal), Integer.valueOf(credits));
+			ConversionRule rule = new ConversionRule(toDecimal(items), Metal.lookup(metal), Integer.valueOf(credits));
 			rulesCache.put(rule.metal(),rule);
 		};
 	}
@@ -206,7 +202,7 @@ public class ParserImpl implements Parser {
 			String[] elements = symbolsAndMetal[0].split("\\s");
 			RomanNumeral value = null;
 			for (String element : elements) {
-				if( (value=symbolsCache.get(element))==null){
+				if( (value=retrieveRoman(data, element))==Invalid){
 					continue;
 				}
 				sb.append(value.name());
@@ -217,4 +213,21 @@ public class ParserImpl implements Parser {
 		};
 	}
 
+	
+	protected RomanNumeral retrieveRoman(String source, String letteral){
+		RomanNumeral result;
+		if((result=symbolsCache.get(letteral))==null){
+			logger.warn("element not found: [{}] - sequence: [{}] ",letteral,source);
+			return Invalid;
+		}
+		return result;
+	}
+	
+	protected String [] symbolsAndMetal(String input){
+		Matcher matcher = queryMetal.matcher(input);
+		if(!matcher.matches()){
+			return new String[]{input,""};
+		}
+		return new String[]{matcher.group(1),matcher.group(2)};
+	}
 }// END

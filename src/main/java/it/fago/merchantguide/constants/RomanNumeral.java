@@ -10,9 +10,11 @@ import org.slf4j.LoggerFactory;
 
 public enum RomanNumeral {
 
-	I(1), V(5), X(10), L(50), C(100), D(500), M(1000), Invalid(-1);
+	I(1, 'I'), V(5, 'V'), X(10, 'X'), L(50, 'L'), C(100, 'C'), D(500, 'D'), M(1000, 'M'), Invalid(-1, '_');
 
 	private static final HashMap<String, RomanNumeral> cached = new HashMap<>();
+
+	private static final HashMap<Character, RomanNumeral> cachedByChar = new HashMap<>();
 
 	private static final Pattern romansValidator = Pattern
 			.compile("(?<=^)M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})(?=$)");
@@ -22,21 +24,29 @@ public enum RomanNumeral {
 	static {
 		for (RomanNumeral numeral : RomanNumeral.values()) {
 			cached.putIfAbsent(numeral.name(), numeral);
+			cachedByChar.putIfAbsent(numeral.charLetteral(), numeral);
 		}
 	}
 	private int decimalValue;
 
-	private RomanNumeral(int decimalValue) {
+	private char charLetteral;
+
+	private RomanNumeral(int decimalValue, char charLetteral) {
 		this.decimalValue = decimalValue;
+		this.charLetteral = charLetteral;
 	}
 
 	public int decimalValue() {
 		return decimalValue;
 	}
 
+	public char charLetteral() {
+		return charLetteral;
+	}
+
 	/**
-	 * Used To Avoid Execpetion as for Enum.valueOf
-	 *  
+	 * Used To Avoid Exception as for Enum.valueOf
+	 * 
 	 * @param text
 	 * @return RomanNumeral
 	 */
@@ -45,6 +55,20 @@ public enum RomanNumeral {
 		return (m = cached.get(text)) == null ? Invalid : m;
 	}
 
+	/**
+	 * 
+	 * Used To Avoid Exception as for Enum.valueOf
+	 * Lookup by character
+	 * 
+	 * @param letteral
+	 * @return
+	 */
+	public static final RomanNumeral lookupByChar(char letteral) {
+		RomanNumeral m;
+		return (m = cachedByChar.get(letteral)) == null ? Invalid : m;
+	}
+
+	
 	public static int toDecimal(List<RomanNumeral> numerals) {
 		if (numerals == null || numerals.size() == 0) {
 			return 0;
@@ -68,8 +92,11 @@ public enum RomanNumeral {
 			return 0;
 		}
 
-		RomanNumeral[] elements = workData.chars().mapToObj(c -> RomanNumeral.lookup(String.valueOf((char) c)))
-				.collect(Collectors.toList()).toArray(new RomanNumeral[size]);
+		RomanNumeral[] elements = workData
+				.chars()
+				   .mapToObj(c->RomanNumeral.lookupByChar((char)c))
+				.collect(Collectors.toList())
+			.toArray(new RomanNumeral[size]);
 
 		int num = 0;
 		int decimalNum = 0;
