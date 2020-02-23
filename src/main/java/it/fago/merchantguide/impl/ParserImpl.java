@@ -15,6 +15,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 
 import it.fago.merchantguide.Parser;
+import it.fago.merchantguide.ParsingSummary;
 import it.fago.merchantguide.TradeContext;
 import it.fago.merchantguide.TradeQuery;
 import it.fago.merchantguide.constants.Metal;
@@ -32,28 +33,31 @@ public class ParserImpl implements Parser {
 
 	private volatile boolean initialized;
 
-	private int parsed = 0;
-
 	private ParserHelper helper = new ParserHelper();
 
+	@Override
 	public Parser parse(InputStream inputStream) {
-
 		new LineNumberReader(new InputStreamReader(inputStream))
-		        .lines()
-		        .map(this::dispatchLine)
-				  .collect(toList())
+		.lines()
+		  .map(this::dispatchLine)
+		     .collect(toList())
 				.forEach(Runnable::run);
 
 		initialized = true;
 		return this;
 	}
 
+	@Override
 	public Optional<TradeContext> createContext() {
 		return initialized ? Optional.of(new TradeContextImpl(rulesCache)) : Optional.empty();
 	}
 
+	@Override
 	public void destroy() {
 		initialized = false;
+		rulesCache.clear();
+		symbolsCache.clear();
+		queriesCache.clear();
 	}
 
 	public Map<Metal, ConversionRule> rules() {
@@ -64,17 +68,16 @@ public class ParserImpl implements Parser {
 		return symbolsCache;
 	}
 
+	@Override
 	public List<TradeQuery> queries() {
 		return queriesCache;
 	}
 
-	public int linesParsed() {
-		return parsed;
+	@Override
+	public ParsingSummary parsingSummary() {
+		return helper.summary();
 	}
 
-	public int linesFailed() {
-		return helper.failedLines();
-	}
 	// =======================================================
 	//
 	// Main Callback - Internal
@@ -82,7 +85,6 @@ public class ParserImpl implements Parser {
 	// =======================================================
 
 	protected Runnable dispatchLine(String line) {
-		updateParsedLineCount();
 		if (helper.isSymbolLine(line)) {
 			return helper.defineSymbol(symbolsCache, line);
 		}
@@ -93,16 +95,6 @@ public class ParserImpl implements Parser {
 			return helper.defineQuery(symbolsCache, queriesCache, line);
 		}
 		return helper.failedLineTask();
-	}
-
-	// =======================================================
-	//
-	// Internals
-	//
-	// =======================================================
-
-	private void updateParsedLineCount() {
-		parsed++;
 	}
 
 }// END

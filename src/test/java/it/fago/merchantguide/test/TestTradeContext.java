@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 
+import it.fago.merchantguide.ParsingSummary;
 import it.fago.merchantguide.TradeContext;
 
 public class TestTradeContext extends BaseTest {
@@ -21,9 +22,10 @@ public class TestTradeContext extends BaseTest {
 		Optional<TradeContext> ctx = parser().parse(from(completeEmpty())).createContext();
 		ctx.ifPresent(this::answering);
 
-		assertEquals("Parsed Lines", 0, parser().linesParsed());
-		assertEquals("Failed Lines", 0, parser().linesFailed());
-
+		ParsingSummary summary = parser().parsingSummary();
+		assertEquals("Parsed Lines", 0, summary.linesParsed());
+		assertEquals("Failed Lines", 0, summary.linesFailed());
+		assertEquals("Warning Lines", 0, summary.warnings());
 	}
 
 	@Test
@@ -32,20 +34,25 @@ public class TestTradeContext extends BaseTest {
 		Optional<TradeContext> ctx = parser().parse(from(complete1())).createContext();
 		ctx.ifPresent(this::answering);
 
-		assertEquals("Parsed Lines", 12, parser().linesParsed());
-		assertEquals("Failed Lines", 0, parser().linesFailed());
-
+		ParsingSummary summary = parser().parsingSummary();
+		
+		assertEquals("Parsed Lines", 12, summary.linesParsed());
+		assertEquals("Failed Lines", 0, summary.linesFailed());
+		assertEquals("Warning Lines", 11, summary.warnings());
 	}
 
+	
 	@Test
 	public void testCorrupted() {
 
 		Optional<TradeContext> ctx = parser().parse(from(completeCorrupted())).createContext();
 		ctx.ifPresent(this::answering);
 
-		assertEquals("Parsed Lines", 11, parser().linesParsed());
-		assertEquals("Failed Lines", 0, parser().linesFailed());
-
+		ParsingSummary summary = parser().parsingSummary();
+		
+		assertEquals("Parsed Lines", 11, summary.linesParsed());
+		assertEquals("Failed Lines", 0, summary.linesFailed());
+		assertEquals("Warning Lines", 14, summary.warnings());
 	}
 
 	// ========================================

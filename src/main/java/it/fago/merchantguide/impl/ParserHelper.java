@@ -15,12 +15,15 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 
+import it.fago.merchantguide.ParsingSummary;
 import it.fago.merchantguide.TradeQuery;
 import it.fago.merchantguide.constants.Metal;
 import it.fago.merchantguide.constants.RomanNumeral;
 
 class ParserHelper {
 
+	private static Logger logger = getLogger(ParserHelper.class.getName());
+	
 	private Pattern symbolPattern = Pattern.compile("([a-z]+) means ([I|V|X|L|C|D|M])");
 
 	private Pattern creditPattern = Pattern
@@ -30,16 +33,16 @@ class ParserHelper {
 	
 	private Pattern queryMetal = Pattern.compile("(.+)(Silver|Iron|Gold)(.*)");
 	
-	private static Logger logger = getLogger(ParserHelper.class.getName());
-	
 	private int failed=0;
 	
+	private int parsed=0;
+		
 	private final Runnable failedLineTask = () -> failed++;
 	
+	private ArrayList<String> galaxiansNotFound = new ArrayList<>();
 	
-	int failedLines(){
-		return failed;
-	}
+	
+	
 	
 	boolean isSymbolLine(String line) {
 		return symbolPattern.matcher(line).matches();
@@ -54,6 +57,7 @@ class ParserHelper {
 	}
 	
 	Runnable defineSymbol(Map<String,RomanNumeral> symbolsCache,String line) {
+		updateParsedLines();
 		Matcher matcher = symbolPattern.matcher(line);
 		if (matcher.matches()) {
 			int groupCount = matcher.groupCount();
@@ -66,6 +70,7 @@ class ParserHelper {
 	}
 
 	Runnable defineRule(Map<String,RomanNumeral> symbolsCache, Map<Metal, ConversionRule> rulesCache,String line) {
+		updateParsedLines();
 		Matcher matcher = creditPattern.matcher(line);
 		if (matcher.matches()) {
 			int groupCount = matcher.groupCount();
@@ -78,6 +83,7 @@ class ParserHelper {
 	}
 
 	Runnable defineQuery(Map<String,RomanNumeral> symbolsCache,ArrayList<TradeQuery> queriesCache,String line) {
+		updateParsedLines();
 		Matcher matcher = isQueryPattern.matcher(line);
 		if (matcher.matches()) {
 			int groupCount = matcher.groupCount();
@@ -125,26 +131,32 @@ class ParserHelper {
 		};
 	}
     
-    Runnable failedLineTask(){
+    
+    Runnable failedLineTask() {
     	return failedLineTask;
     }
     
+    
+    ParsingSummary summary(){
+    	return new ParsingSummary(parsed, failed, galaxiansNotFound);
+    }
     //=========================================================================
     //
     //
     //
     //=========================================================================
     
-    protected RomanNumeral retrieveRoman(Map<String,RomanNumeral> symbolsCache, String source, String letteral){
+    private RomanNumeral retrieveRoman(Map<String,RomanNumeral> symbolsCache, String source, String letteral){
 		RomanNumeral result;
 		if((result=symbolsCache.get(letteral))==null){
 			logger.warn("Galaxian Symbol not found: [{}] - sequence: [{}] ",letteral,source);
+			updateGalaxianLetteralNotFound(letteral);
 			return Invalid;
 		}
 		return result;
 	}
     
-    protected String [] symbolsAndMetal(String input){
+    private String [] symbolsAndMetal(String input){
 		Matcher matcher = queryMetal.matcher(input);
 		if(!matcher.matches()){
 			return new String[]{input,""};
@@ -152,4 +164,13 @@ class ParserHelper {
 		return new String[]{matcher.group(1),matcher.group(2)};
 	}
     
+   private void updateParsedLines(){
+	   parsed++;
+   }
+   
+   private void updateGalaxianLetteralNotFound(String letteral){
+	    galaxiansNotFound.add(letteral);
+   }
+
+   
 }//END

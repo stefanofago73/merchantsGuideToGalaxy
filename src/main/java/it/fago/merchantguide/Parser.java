@@ -14,8 +14,6 @@ public interface Parser {
 
 	public void destroy();
 
-	public int linesParsed();
-	
-	public int linesFailed();
+	public ParsingSummary parsingSummary();
 	
 }// END
