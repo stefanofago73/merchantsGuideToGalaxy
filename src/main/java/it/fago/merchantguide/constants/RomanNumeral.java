@@ -88,7 +88,7 @@ public enum RomanNumeral {
 		}
 
 		if (!romansValidator.matcher(workData).matches()) {
-			logger.warn("INVALID SEQUENCE: [{}] size: {}", workData, size);
+			logger.warn("Invalid Sequence: [{}] size: {}", workData, size);
 			return 0;
 		}
 
